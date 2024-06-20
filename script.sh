@@ -18,7 +18,6 @@ cpu=$(vmstat 1 2 | tail -1 | awk '{printf("%.2f", (100 - $15))}')
 
 last_boot=$(who -b | awk '$1 == "arranque" {print $4 " " $5}')
 
-# LVM USE
 lvmu=$(if [ $(lsblk | grep "lvm" | wc -l) -gt 0 ]; then echo yes; else echo no; fi)
 
 # TCP CONNEXIONS
