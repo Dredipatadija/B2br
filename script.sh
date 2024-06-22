@@ -12,26 +12,25 @@ ram_percent=$(free --mega | awk '$1 == "Mem:" {printf("%.2f", ($3/$2)*100)}')
 
 disk_available=$(df -m | grep "^/dev/" | grep -v "/boot" | awk '{disk_a += $4} END {printf("%.2fGb", disk_a/1024)}')
 
-disk_percent=$(df -m | grep "^/dev/" | grep -v "/boot" | awk '{disk_u += $3} {disk_t+= $2} END {printf("%.2f", disk_u/disk_t*100)}')
+disk_percent=$(df -m | grep "^/dev/" | grep -v "/boot" | awk '{disk_u += $3} {disk_t+= $2} END {printf("%.2f", disk_u/disk_t*100)}>
 
 cpu=$(vmstat 1 2 | tail -1 | awk '{printf("%.2f", (100 - $15))}')
 
 last_boot=$(who -b | awk '$1 == "arranque" {print $4 " " $5}')
 
-lvmu=$(if [ $(lsblk | grep "lvm" | wc -l) -gt 0 ]; then echo yes; else echo no; fi)
+lvm=$(if [ $(lsblk | grep "lvm" | wc -l) -gt 0 ]; then echo yes; else echo no; fi)
 
-# TCP CONNEXIONS
-tcpc=$(ss -ta | grep ESTAB | wc -l)
+conex=$(ss -ta | grep ESTAB | wc -l)
 
-# USER LOG
-ulog=$(users | wc -w)
+registered_u=$(grep -vE '/nologin$|/sync$' /etc/passwd | wc -l)
 
-# NETWORK
-ip=$(hostname -I)
-mac=$(ip link | grep "link/ether" | awk '{print $2}')
+active_u=$(users | wc -w)
 
-# SUDO
-cmnd=$(journalctl _COMM=sudo | grep COMMAND | wc -l)
+ip=$(hostname -I | awk '{print $1}')
+
+MAC=$(ip link | grep "link/ether" | awk '{print $2}')
+
+cmnd_sudo=$(journalctl _COMM=sudo | grep COMMAND | wc -w)
 
 wall "  Architecture: $arch
         CPU physical: $cpu_phy
@@ -42,6 +41,11 @@ wall "  Architecture: $arch
         Disk Usage: $disk_percent%
         CPU load: $cpu%
         Last boot: $last_boot
-        LVM use: $lvmu
-        Connections TCP: $tcpc ESTABLISHED
-        User log: $ulog
+        LVM use: $lvm
+        Connections TCP: $conex ESTABLISHED
+        Registered users: $registered_u
+        Active_u: $active_u
+        Ipv4 (MAC): $ip ($MAC)
+        Sudo: $cmnd_sudo cmd"
+
+
